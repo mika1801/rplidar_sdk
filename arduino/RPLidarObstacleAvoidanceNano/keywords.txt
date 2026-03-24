@@ -1,0 +1,59 @@
+# Syntax highlighting for RPLidarObstacleAvoidanceNano
+# ──────────────────────────────────────────────────────
+
+# ── Class & structs ────────────────────────────────────────────────────────────
+RPLidarObstacleAvoidanceNano	KEYWORD1
+ScanPoint	KEYWORD1
+ObstacleDirection	KEYWORD1
+
+# ── Nested config struct ───────────────────────────────────────────────────────
+Config	KEYWORD1
+
+# ── Methods ───────────────────────────────────────────────────────────────────
+begin	KEYWORD2
+stop	KEYWORD2
+update	KEYWORD2
+isScanComplete	KEYWORD2
+isConnected	KEYWORD2
+isObstacleInZone	KEYWORD2
+isObstacleFront	KEYWORD2
+isObstacleLeft	KEYWORD2
+isObstacleRight	KEYWORD2
+isObstacleBack	KEYWORD2
+getMinDistance	KEYWORD2
+getDistanceAt	KEYWORD2
+getRecommendedDirection	KEYWORD2
+startDriveForward	KEYWORD2
+startDriveBackward	KEYWORD2
+startTurnLeft	KEYWORD2
+startTurnRight	KEYWORD2
+isManeuverComplete	KEYWORD2
+abortManeuver	KEYWORD2
+driveForward	KEYWORD2
+driveBackward	KEYWORD2
+turnLeft	KEYWORD2
+turnRight	KEYWORD2
+motorStop	KEYWORD2
+getLeftRPM	KEYWORD2
+getRightRPM	KEYWORD2
+getLeftTicks	KEYWORD2
+getRightTicks	KEYWORD2
+isLeftMotorStalled	KEYWORD2
+isRightMotorStalled	KEYWORD2
+setFrontSector	KEYWORD2
+setLeftSector	KEYWORD2
+setRightSector	KEYWORD2
+setBackSector	KEYWORD2
+getScanData	KEYWORD2
+setMinQuality	KEYWORD2
+getScanCount	KEYWORD2
+getErrorCount	KEYWORD2
+config	KEYWORD2
+
+# ── Constants ─────────────────────────────────────────────────────────────────
+DIRECTION_CLEAR	LITERAL1
+DIRECTION_FORWARD	LITERAL1
+DIRECTION_LEFT	LITERAL1
+DIRECTION_RIGHT	LITERAL1
+DIRECTION_BACKWARD	LITERAL1
+DIRECTION_BLOCKED	LITERAL1
