@@ -4,8 +4,8 @@
  * Advanced example: RPLidar A1M8 obstacle avoidance integrated with a
  * differential-drive robot on the Arduino Giga R1 WiFi.
  *
- * Two DC motors are driven via an L298N (or compatible) H-bridge module.
- * Motor commands are sent via PWM + direction pins.
+ * Two DC motors are driven via the Arduino Motor Shield Rev3 (L298P).
+ * The shield stacks directly on top of the Giga R1 WiFi.
  *
  * Wiring – RPLidar
  * ────────────────
@@ -15,14 +15,13 @@
  *   RPLidar GND   →  GND
  *   MOTO_CTRL     →  D2  (HIGH = motor spinning)
  *
- * Wiring – L298N H-bridge
- * ───────────────────────
- *   ENA (left PWM)   →  D5
- *   IN1 (left fwd)   →  D6
- *   IN2 (left rev)   →  D7
- *   ENB (right PWM)  →  D8
- *   IN3 (right fwd)  →  D9
- *   IN4 (right rev)  →  D10
+ * Arduino Motor Shield Rev3 – fixed pin mapping (no wiring needed)
+ * ────────────────────────────────────────────────────────────────
+ *   Channel A  (left  motor): DIR=D12  PWM=D3   BRAKE=D9   SENSE=A0
+ *   Channel B  (right motor): DIR=D13  PWM=D11  BRAKE=D8   SENSE=A1
+ *
+ *   DIR  HIGH → forward,  LOW → reverse
+ *   BRAKE HIGH → hard brake (coasts when LOW)
  *
  * Coordinate convention:
  *   The RPLidar sits facing forward on the robot.
@@ -38,13 +37,14 @@ static const float SLOW_DIST_MM    = 600.0f;  // Slow down when closer than 60 c
 
 RPLidarObstacleAvoidance lidar(Serial1, LIDAR_MOTOR_PIN);
 
-// ─── Motor pins ─────────────────────────────────────────────────────────────
-static const int PIN_ENA = 5;   // Left  motor PWM
-static const int PIN_IN1 = 6;   // Left  motor forward
-static const int PIN_IN2 = 7;   // Left  motor reverse
-static const int PIN_ENB = 8;   // Right motor PWM
-static const int PIN_IN3 = 9;   // Right motor forward
-static const int PIN_IN4 = 10;  // Right motor reverse
+// ─── Motor Shield Rev3 – fixed pin mapping ──────────────────────────────────
+// Channel A = left motor, Channel B = right motor
+static const int PIN_DIR_A   = 12;  // Channel A direction (HIGH=fwd, LOW=rev)
+static const int PIN_PWM_A   =  3;  // Channel A speed (PWM)
+static const int PIN_BRAKE_A =  9;  // Channel A brake  (HIGH=brake, LOW=coast)
+static const int PIN_DIR_B   = 13;  // Channel B direction
+static const int PIN_PWM_B   = 11;  // Channel B speed (PWM)
+static const int PIN_BRAKE_B =  8;  // Channel B brake
 
 static const int SPEED_FULL  = 200;  // 0-255 PWM
 static const int SPEED_SLOW  = 120;
@@ -80,9 +80,9 @@ void setup()
     Serial.begin(115200);
     while (!Serial && millis() < 3000) {}
 
-    // Motor pins
-    pinMode(PIN_ENA, OUTPUT); pinMode(PIN_IN1, OUTPUT); pinMode(PIN_IN2, OUTPUT);
-    pinMode(PIN_ENB, OUTPUT); pinMode(PIN_IN3, OUTPUT); pinMode(PIN_IN4, OUTPUT);
+    // Motor Shield Rev3 pins
+    pinMode(PIN_DIR_A,   OUTPUT); pinMode(PIN_PWM_A,   OUTPUT); pinMode(PIN_BRAKE_A, OUTPUT);
+    pinMode(PIN_DIR_B,   OUTPUT); pinMode(PIN_PWM_B,   OUTPUT); pinMode(PIN_BRAKE_B, OUTPUT);
     motorStop();
 
     Serial.println("RPLidar A1M8 – Robot Navigation Example");
@@ -208,27 +208,30 @@ static void applyCurrentState()
     }
 }
 
-// ─── Motor helpers ───────────────────────────────────────────────────────────
+// ─── Motor helpers (Arduino Motor Shield Rev3) ──────────────────────────────
+//
+// Motor Shield Rev3 interface per channel:
+//   DIR   HIGH = forward,  LOW = reverse
+//   BRAKE HIGH = hard brake (motor short-circuits internally)
+//   PWM   analogWrite speed 0-255
+
+static void setChannel(int dirPin, int pwmPin, int brakePin, int pwm)
+{
+    // Release brake before changing speed/direction
+    digitalWrite(brakePin, LOW);
+    if (pwm >= 0) {
+        digitalWrite(dirPin, HIGH);
+        analogWrite(pwmPin, pwm);
+    } else {
+        digitalWrite(dirPin, LOW);
+        analogWrite(pwmPin, -pwm);
+    }
+}
 
 static void setMotors(int leftPwm, int rightPwm)
 {
-    // Left motor
-    if (leftPwm >= 0) {
-        digitalWrite(PIN_IN1, HIGH); digitalWrite(PIN_IN2, LOW);
-        analogWrite(PIN_ENA, leftPwm);
-    } else {
-        digitalWrite(PIN_IN1, LOW); digitalWrite(PIN_IN2, HIGH);
-        analogWrite(PIN_ENA, -leftPwm);
-    }
-
-    // Right motor
-    if (rightPwm >= 0) {
-        digitalWrite(PIN_IN3, HIGH); digitalWrite(PIN_IN4, LOW);
-        analogWrite(PIN_ENB, rightPwm);
-    } else {
-        digitalWrite(PIN_IN3, LOW); digitalWrite(PIN_IN4, HIGH);
-        analogWrite(PIN_ENB, -rightPwm);
-    }
+    setChannel(PIN_DIR_A, PIN_PWM_A, PIN_BRAKE_A, leftPwm);
+    setChannel(PIN_DIR_B, PIN_PWM_B, PIN_BRAKE_B, rightPwm);
 }
 
 static void driveForward (int speed) { setMotors( speed,  speed); }
@@ -237,9 +240,9 @@ static void turnLeft     (int speed) { setMotors(-speed,  speed); }
 static void turnRight    (int speed) { setMotors( speed, -speed); }
 static void motorStop()
 {
-    analogWrite(PIN_ENA, 0); analogWrite(PIN_ENB, 0);
-    digitalWrite(PIN_IN1, LOW); digitalWrite(PIN_IN2, LOW);
-    digitalWrite(PIN_IN3, LOW); digitalWrite(PIN_IN4, LOW);
+    // Apply hard brake on both channels
+    analogWrite(PIN_PWM_A, 0); digitalWrite(PIN_BRAKE_A, HIGH);
+    analogWrite(PIN_PWM_B, 0); digitalWrite(PIN_BRAKE_B, HIGH);
 }
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
