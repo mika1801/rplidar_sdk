@@ -1,0 +1,44 @@
+# Syntax highlighting for RPLidarObstacleAvoidance
+# ──────────────────────────────────────────────────
+# Format: KEYWORD\tTOKEN_TYPE
+#   KEYWORD1  = type / class names
+#   KEYWORD2  = method / function names
+#   LITERAL1  = constants / enum values
+
+# ── Class ────────────────────────────────────────────────────────────────────
+RPLidarObstacleAvoidance	KEYWORD1
+
+# ── Structs / enums ───────────────────────────────────────────────────────────
+ScanPoint	KEYWORD1
+ObstacleDirection	KEYWORD1
+
+# ── Methods ──────────────────────────────────────────────────────────────────
+begin	KEYWORD2
+stop	KEYWORD2
+update	KEYWORD2
+isScanComplete	KEYWORD2
+isConnected	KEYWORD2
+isObstacleInZone	KEYWORD2
+isObstacleFront	KEYWORD2
+isObstacleLeft	KEYWORD2
+isObstacleRight	KEYWORD2
+isObstacleBack	KEYWORD2
+getMinDistance	KEYWORD2
+getDistanceAt	KEYWORD2
+getRecommendedDirection	KEYWORD2
+setFrontSector	KEYWORD2
+setLeftSector	KEYWORD2
+setRightSector	KEYWORD2
+setBackSector	KEYWORD2
+getScanData	KEYWORD2
+setMinQuality	KEYWORD2
+getScanCount	KEYWORD2
+getErrorCount	KEYWORD2
+
+# ── Constants (ObstacleDirection enum values) ─────────────────────────────────
+DIRECTION_CLEAR	LITERAL1
+DIRECTION_FORWARD	LITERAL1
+DIRECTION_LEFT	LITERAL1
+DIRECTION_RIGHT	LITERAL1
+DIRECTION_BACKWARD	LITERAL1
+DIRECTION_BLOCKED	LITERAL1
